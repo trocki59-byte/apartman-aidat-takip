@@ -7,3 +7,5 @@ data/
 outputs/
 .superpowers/
 test-results/
+
+dist/

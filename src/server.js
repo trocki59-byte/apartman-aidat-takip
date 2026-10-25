@@ -7,7 +7,7 @@ import { createAuth, passwordHash, verifyPassword } from './auth.js';
 import { ensure, InputError } from './validation.js';
 
 const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
-const assets = new Map([['/', ['index.html', 'text/html; charset=utf-8']], ['/app.js', ['app.js', 'text/javascript; charset=utf-8']], ['/reports.js', ['reports.js', 'text/javascript; charset=utf-8']], ['/styles.css', ['styles.css', 'text/css; charset=utf-8']], ['/favicon.svg', ['favicon.svg', 'image/svg+xml']]]);
+const assets = new Map([['/', ['index.html', 'text/html; charset=utf-8']], ['/app.js', ['app.js', 'text/javascript; charset=utf-8']], ['/reports.js', ['reports.js', 'text/javascript; charset=utf-8']], ['/transport.js', ['transport.js', 'text/javascript; charset=utf-8']], ['/styles.css', ['styles.css', 'text/css; charset=utf-8']], ['/favicon.svg', ['favicon.svg', 'image/svg+xml']]]);
 export function createApplication({ dbPath = resolve('data/aidat.sqlite'), adminPassword, allowSetup = true, publicOrigin, secureCookie = false, passwordRequired = false } = {}) {
   const store = createStore(dbPath), { db } = store;
   // A restart may change the access mode; never reuse public sessions as logins.

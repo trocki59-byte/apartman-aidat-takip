@@ -2,7 +2,19 @@
 
 Tek apartmanı yöneten kişi için Türkçe, mobil uyumlu web uygulaması. Sakin girişi yoktur. Lacivert ve turkuaz yönetici paneli; gerçek kayıtlarla çalışan sekiz ekran.
 
-## Hızlı başlangıç
+## Ücretsiz internet sürümü
+
+Ücretsiz statik sürüm GitHub Pages için hazırlanmıştır. Parola, sunucu veya ücretli disk gerekmez. **Mali kayıtlar yalnızca kullandığınız cihazdaki tarayıcıda IndexedDB içinde saklanır; cihazlar arasında otomatik eşitlenmez.** Siteyi başka cihazda açınca ayrı, boş kayıt alanı görülür. Gizli gezinme kullanmayın; tarayıcı/site verilerini temizlemek kayıtları siler.
+
+Ayarlar → **Yedek İndir** ile JSON yedeğini düzenli olarak saklayın. Yeni cihazda aynı siteyi açıp Ayarlar → **Yedek Yükle** kullanın. Yükleme mevcut kayıtların yerine geçer; işlem öncesinde eski kayıtlarınızın kopyası indirilir. Geçersiz yedek kaydedilmez. Veriler ve yedekler GitHub'a veya yayın sunucusuna gönderilmez.
+
+Statik dosyaları üretmek için `npm run build:free` çalıştırın. `dist/` içeriği GitHub Pages'te alt dizinde çalışacak biçimdedir; Pages için `.nojekyll` bulunur. Uygulama açıldıktan sonra bağlantı kesilirse açık panelde kayıt yapabilirsiniz; çevrimdışı yeniden açılış garantisi yoktur.
+
+GitHub Pages kurulumu: ücretsiz GitHub hesabında depo herkese açık olmalı; Settings → Pages → Deploy from a branch → `gh-pages` / `(root)` → Save. `gh-pages` dalı yalnızca üretilmiş statik uygulama dosyalarını içerir. Kaynak depo görünürlüğü kullanıcı onayı olmadan değiştirilmez. Henüz doğrulanmamış bir yayın adresi canlı site olarak sunulmaz.
+
+Aşağıdaki Node.js/SQLite talimatları yerel sunucu sürümü içindir; ücretsiz statik yayında uygulanmaz.
+
+## Yerel sunucu: hızlı başlangıç
 
 **Gereken:** Node.js 24 veya üzeri. Normal kullanımda npm paketi yüklemek gerekmez; uygulamanın üretim bağımlılığı yoktur.
 
@@ -120,9 +132,9 @@ docker run -d --name aidat \
 
 Bu örnek HTTPS reverse proxy arkasında kullanım içindir. Üretim çerezi yalnızca HTTPS üzerinden gönderilir. SQLite dosyasını kalıcı volume'de tutun ve düzenli yedek alın. Docker imajının burada çalıştırılarak doğrulanmadığını dikkate alın.
 
-### Render hazırlığı
+### Ücretli dağıtım kapalı
 
-`render.yaml` dosyası Docker hizmeti, tek sunucu, 1 GB kalıcı disk ve HTTPS çerezi için hazırlandı. **Starter ve kalıcı disk ücretlidir; bu dosya henüz Render'da uygulanmadı.** Blueprint `PASSWORD_REQUIRED=false` ile kurulur; parola tanımlama adımı yoktur. Parolayı sonradan etkinleştirmek isterseniz `PASSWORD_REQUIRED=true` ve `ADMIN_PASSWORD` değişkenlerini Render üzerinde ayarlayın. Hizmetin gerçek URL'si belli olduğunda `PUBLIC_ORIGIN` değişkenini bu HTTPS adresine, sonunda `/` olmadan ayarlayın. Otomatik dağıtım kapalıdır; yayımlama kontrollü başlatılır. İlk dağıtım sonrası giriş, veri kaydı ve yeniden dağıtımda veri kalıcılığı ayrıca doğrulanmalıdır.
+Kullanıcının sıfır ücret talebi doğrultusunda ücretli Render blueprint'i kaldırılmıştır. Ücretsiz yayın, yukarıdaki tarayıcı kayıtlı statik sürümdür. Bu sürüm için Render, Neon veya başka bir veritabanı bağlantısı gerekmez.
 
 Sites yardımcıları bu çalışma ortamında bulunmadığı için bu proje Sites'a yayımlanmadı. Henüz canlı yayın bağlantısı yoktur.
 
@@ -141,7 +153,7 @@ npm start
 
 ZIP dosyası Git geçmişini içermez; güncel kod ve geçmiş için depoyu klonlayın.
 
-Veri dosyaları, parolalar, yedekler ve test çıktıları depoya girmez. GitHub Pages bu sunucu uygulamasını çalıştırmaz; Render gibi kalıcı disk destekli bir hizmet gerekir.
+Veri dosyaları, parolalar, yedekler ve test çıktıları depoya girmez. GitHub Pages `gh-pages` dalındaki ücretsiz tarayıcı sürümünü çalıştırabilir; Node.js/SQLite sunucu sürümünü çalıştırmaz.
 
 ## Kontroller
 
@@ -154,7 +166,7 @@ npm run check
 
 Test ortamı ağ portu açmayı engellediği için HTTP testleri sunucunun gerçek HTTP ayrıştırıcısına bellek içi bağlantı üzerinden istek verir. Üretim sunucusu normal Node HTTP sunucusudur; test için API yolları atlanmaz.
 
-Son doğrulamada 24 test geçti; dış ağda sunucu başlatma alt süreç testi ortamın `EPERM` engeli nedeniyle atlandı. Sözdizimi kontrolleri geçti. Yedekleme ve parola sıfırlama gerçek SQLite dosyalarıyla test edildi.
+Son doğrulamada 29 test geçti; dış ağda sunucu başlatma alt süreç testi ortamın `EPERM` engeli nedeniyle atlandı. Sözdizimi kontrolleri geçti. Yedekleme ve parola sıfırlama gerçek SQLite dosyalarıyla test edildi.
 
 Tarayıcı akış testleri için geliştirme bağımlılığını ve Chromium'u yükleyin:
 

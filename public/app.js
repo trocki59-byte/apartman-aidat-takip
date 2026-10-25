@@ -1,3 +1,4 @@
+import { request, storageMode } from './transport.js';
 import { money, numberInput, displayDate, today, parseMoney, csv, overview, reportRows } from './reports.js';
 
 const $ = (s, root = document) => root.querySelector(s);
@@ -37,7 +38,7 @@ const modal = $('#modal');
 let modalSubmit = null, toastTimer;
 function toast(message, error = false) { const el = $('#toast'); el.textContent = message; el.className = `visible${error ? ' error' : ''}`; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.className = '', 4000); }
 async function api(path, body) {
-  const response = await fetch('/api/' + path, { method: body === undefined ? 'GET' : 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': state.csrf }, credentials: 'same-origin', body: body === undefined ? undefined : JSON.stringify(body) });
+  const response = await request(path, body, state.csrf);
   const result = await response.json();
   if (!response.ok) { const error = new Error(result.error || 'İşlem tamamlanamadı.'); error.status = response.status; throw error; }
   return result;
@@ -62,7 +63,7 @@ const noteField = (value = '', required = false) => `<label class="field">Açık
 function rowVoid(type, id) { return iconBtn('Kaydı iptal et', 'void', 'cancel', id, `data-type="${type}"`); }
 function shell() {
   const current = navItems.find(n => n[0] === state.page) || navItems[0];
-  $('#app').innerHTML = `<div class="nav-overlay" data-action="close-menu"></div><aside class="sidebar" aria-label="Ana gezinme">${brand()}<div class="nav-label">YÖNETİM PANELİ</div><nav class="nav">${navItems.map(([id, label, ico]) => `<a href="#${id}" class="${state.page === id ? 'active' : ''}" ${state.page === id ? 'aria-current="page"' : ''}>${icon(ico)}${label}</a>`).join('')}</nav><div class="sidebar-bottom"><div class="avatar">${icon('users')}</div><div><strong>Yönetici</strong><small>Tek apartman yönetimi</small></div>${state.passwordRequired ? iconBtn('Çıkış yap', 'logout', 'logout', '') : ''}</div></aside><div class="workspace"><header class="topbar"><div class="breadcrumb"><button class="icon-button mobile-menu" data-action="menu" aria-label="Menüyü aç">${icon('menu')}</button><span>${esc(state.data.settings.name)}</span>${icon('arrow')}<strong>${current[1]}</strong></div><div class="top-meta"><span class="private-label">${icon(state.passwordRequired ? 'lock' : 'info')} ${state.passwordRequired ? 'Yalnızca yönetici erişimi' : 'Parolasız erişim'}</span><span class="top-date">${new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>${iconBtn('Verileri yenile', 'refresh', 'refresh', '')}</div></header><main class="main" id="main" tabindex="-1"></main></div>`;
+  $('#app').innerHTML = `<div class="nav-overlay" data-action="close-menu"></div><aside class="sidebar" aria-label="Ana gezinme">${brand()}<div class="nav-label">YÖNETİM PANELİ</div><nav class="nav">${navItems.map(([id, label, ico]) => `<a href="#${id}" class="${state.page === id ? 'active' : ''}" ${state.page === id ? 'aria-current="page"' : ''}>${icon(ico)}${label}</a>`).join('')}</nav><div class="sidebar-bottom"><div class="avatar">${icon('users')}</div><div><strong>Yönetici</strong><small>Tek apartman yönetimi</small></div>${state.passwordRequired ? iconBtn('Çıkış yap', 'logout', 'logout', '') : ''}</div></aside><div class="workspace"><header class="topbar"><div class="breadcrumb"><button class="icon-button mobile-menu" data-action="menu" aria-label="Menüyü aç">${icon('menu')}</button><span>${esc(state.data.settings.name)}</span>${icon('arrow')}<strong>${current[1]}</strong></div><div class="top-meta"><span class="private-label">${icon(state.passwordRequired ? 'lock' : 'info')} ${state.passwordRequired ? 'Yalnızca yönetici erişimi' : storageMode === 'browser' ? 'Bu tarayıcıdaki kayıtlar' : 'Parolasız erişim'}</span><span class="top-date">${new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>${iconBtn('Verileri yenile', 'refresh', 'refresh', '')}</div></header><main class="main" id="main" tabindex="-1"></main></div>`;
   render();
 }
 function heading() {
@@ -76,7 +77,7 @@ function heading() {
 }
 function render() {
   const views = { dashboard, units, charges, payments, expenses, accounts, reports, settings };
-  $('#main').innerHTML = heading() + views[state.page]() + `<footer class="footer"><span>${icon('building')} ${esc(state.data.settings.name)} · Aidat Takip</span><span>${icon('lock')} Kayıtlarınız bu sunucudaki veritabanında saklanır.</span></footer>`;
+  $('#main').innerHTML = heading() + (storageMode === 'browser' ? `<div class="notice">${icon('info')}<span><strong>Ücretsiz kişisel sürüm.</strong> Kayıtlar bu cihazdaki tarayıcıda saklanır. Başka cihazda görünmez; düzenli yedek indirin. ${btn('Yedek İndir', 'export', 'download')}</span></div>` : '') + views[state.page]() + `<footer class="footer"><span>${icon('building')} ${esc(state.data.settings.name)} · Aidat Takip</span><span>${icon('lock')} ${storageMode === 'browser' ? 'Kayıtlar bu tarayıcıda saklanır.' : 'Kayıtlarınız bu sunucudaki veritabanında saklanır.'}</span></footer>`;
   if (state.page === 'settings') bindSettings();
 }
 function stats() {
@@ -134,7 +135,7 @@ function reports() {
 const actionNames = { 'unit.save': 'Daire kaydedildi', 'charge.batch': 'Toplu aidat oluşturuldu', 'charge.add': 'Borç eklendi', 'payment.add': 'Tahsilat kaydedildi', 'expense.add': 'Gider kaydedildi', 'transfer.add': 'Hesap transferi', 'account.opening': 'Açılış bakiyesi değişti', 'settings.save': 'Apartman bilgileri güncellendi', 'record.void': 'Mali kayıt iptal edildi' };
 function settings() {
   const s = state.data.settings;
-  return `<div class="settings-grid"><section class="panel"><div class="panel-head"><h2>Apartman Bilgileri</h2>${icon('building')}</div><form id="settings-form">${field('Apartman adı', 'name', s.name, 'text', 'required maxlength="100"')}${field('Adres', 'address', s.address, 'text', 'maxlength="300"')}<div class="form-grid">${field('Varsayılan aylık aidat (₺)', 'monthly', numberInput(s.monthlyCents), 'text', 'required inputmode="decimal"', 'Yeni daire eklenirken önerilir.')}${field('Son ödeme günü', 'dueDay', s.dueDay, 'number', 'required min="1" max="28"', 'Her ayın 1–28. günü.')}</div><p class="form-hint">Varsayılan tutarı değiştirmek mevcut dairelerin aidatlarını değiştirmez. Daireye özel tutarı Daireler ekranından düzenleyin.</p><div class="form-error" role="alert"></div><button class="btn primary" type="submit">${icon('check')} Değişiklikleri Kaydet</button></form></section><div><section class="panel"><div class="panel-head"><h2>Erişim ve Veriler</h2>${icon('lock')}</div><div class="panel-body"><p class="form-hint">${state.passwordRequired ? 'Parola ile yönetici girişi açık. Oturumlar 8 saat sonra sona erer.' : 'Parola ile giriş kapalı. Uygulamaya ulaşan herkes kayıtları görüntüleyebilir ve değiştirebilir.'}</p>${state.passwordRequired ? btn('Parolayı Değiştir', 'password', 'lock') : ''}<hr><p class="form-hint">Mali kayıtlarınızı JSON dosyası olarak dışa aktarabilirsiniz. Bu dosya veri incelemesi içindir; tam yedekleme adımları kurulum belgesindedir.</p>${btn('Verileri Dışa Aktar', 'export', 'download')}</div></section><section class="panel"><div class="panel-head"><h2>Son İşlemler</h2><span class="muted">Son 500 işlem</span></div><div class="audit">${state.data.audit.length ? state.data.audit.map(a => `<div class="audit-item"><span>${actionNames[a.action] || esc(a.action)}</span><small>${esc(a.createdAt)}</small></div>`).join('') : '<p class="form-hint">Henüz işlem yapılmadı.</p>'}</div></section></div></div>`;
+  return `<div class="settings-grid"><section class="panel"><div class="panel-head"><h2>Apartman Bilgileri</h2>${icon('building')}</div><form id="settings-form">${field('Apartman adı', 'name', s.name, 'text', 'required maxlength="100"')}${field('Adres', 'address', s.address, 'text', 'maxlength="300"')}<div class="form-grid">${field('Varsayılan aylık aidat (₺)', 'monthly', numberInput(s.monthlyCents), 'text', 'required inputmode="decimal"', 'Yeni daire eklenirken önerilir.')}${field('Son ödeme günü', 'dueDay', s.dueDay, 'number', 'required min="1" max="28"', 'Her ayın 1–28. günü.')}</div><p class="form-hint">Varsayılan tutarı değiştirmek mevcut dairelerin aidatlarını değiştirmez. Daireye özel tutarı Daireler ekranından düzenleyin.</p><div class="form-error" role="alert"></div><button class="btn primary" type="submit">${icon('check')} Değişiklikleri Kaydet</button></form></section><div><section class="panel"><div class="panel-head"><h2>Erişim ve Veriler</h2>${icon('lock')}</div><div class="panel-body"><p class="form-hint">${state.passwordRequired ? 'Parola ile yönetici girişi açık. Oturumlar 8 saat sonra sona erer.' : (storageMode === 'browser' ? 'Parola yok. Kayıtlar yalnızca bu tarayıcıda saklanır; siteyi başka cihazdan açan kişi kendi boş kayıt alanını görür.' : 'Parola ile giriş kapalı. Uygulamaya ulaşan herkes kayıtları görüntüleyebilir ve değiştirebilir.')}</p>${state.passwordRequired ? btn('Parolayı Değiştir', 'password', 'lock') : ''}<hr><p class="form-hint">${storageMode === 'browser' ? 'Tarayıcı kayıtlarını temizlemek verilerinizi siler. Düzenli olarak yedek indirin. Cihaz değiştirirken yedeği yeni cihazda yükleyin. Gizli gezinme kullanmayın.' : 'Mali kayıtlarınızı JSON dosyası olarak dışa aktarabilirsiniz. Bu dosya veri incelemesi içindir; tam yedekleme adımları kurulum belgesindedir.'}</p>${btn(storageMode === 'browser' ? 'Yedek İndir' : 'Verileri Dışa Aktar', 'export', 'download')}${storageMode === 'browser' ? btn('Yedek Yükle', 'restore', 'file') + '<input type="file" id="restore-file" accept="application/json,.json" hidden>' : ''}</div></section><section class="panel"><div class="panel-head"><h2>Son İşlemler</h2><span class="muted">Son 500 işlem</span></div><div class="audit">${state.data.audit.length ? state.data.audit.map(a => `<div class="audit-item"><span>${actionNames[a.action] || esc(a.action)}</span><small>${esc(a.createdAt)}</small></div>`).join('') : '<p class="form-hint">Henüz işlem yapılmadı.</p>'}</div></section></div></div>`;
 }
 function bindSettings() { $('#settings-form').addEventListener('submit', async e => { e.preventDefault(); const form = e.currentTarget; await submitForm(form, async () => { const p = Object.fromEntries(new FormData(form)); await action('settings.save', { name: p.name, address: p.address, monthlyCents: parseMoney(p.monthly), dueDay: Number(p.dueDay) }); shell(); toast('Apartman bilgileri güncellendi.'); }); }); }
 function showModal(title, content, handler, wide = false, submitLabel = 'Kaydet') {
@@ -204,7 +205,19 @@ function authView(session) {
   if ($('#auth-form')) $('#auth-form').addEventListener('submit', async e => { e.preventDefault(); const form = e.currentTarget; await submitForm(form, async () => { const p = Object.fromEntries(new FormData(form)); if (setup && p.password !== p.confirm) throw new Error('Parolalar eşleşmiyor.'); const result = await api(setup ? 'setup' : 'login', { password: p.password }); state.csrf = result.csrf; await load(); state.page = pageFromHash(); shell(); }); });
 }
 function pageFromHash() { const p = location.hash.slice(1); return navItems.some(n => n[0] === p) ? p : 'dashboard'; }
-async function boot() { try { const session = await api('session'); state.passwordRequired = session.passwordRequired !== false; state.csrf = session.csrf || ''; if (!session.authenticated) { state.data = null; authView(session); return; } await load(); state.page = pageFromHash(); shell(); } catch (e) { $('#app').innerHTML = `<div class="initial-loading"><h2>Sunucuya bağlanılamadı</h2><p>${esc(e.message)}</p>${btn('Tekrar Dene', 'retry', 'refresh')}</div>`; } }
+async function importBackup(file) {
+  if (!file) return;
+  try {
+    if (file.size > 10 * 1024 * 1024) throw new Error('Yedek dosyası 10 MB sınırını aşıyor.');
+    const backup = JSON.parse(await file.text());
+    if (backup.backupFormat !== 'aidat-browser-v1' || !Array.isArray(backup.units)) throw new Error('Geçerli bir aidat takip yedeği seçin.');
+    showModal('Yedeği Geri Yükle', `<div class="notice warning">${icon('info')}<span>Bu işlem mevcut kayıtların yerine seçilen yedeği koyar. Devam etmeden önce mevcut kayıtlarınız otomatik olarak indirilecek.</span></div><p class="form-hint">Yedek: ${esc(backup.settings?.name || 'Apartman')} · ${backup.units.length} daire · ${esc(file.name)}</p>`, async () => {
+      download(JSON.stringify({exportedAt:new Date().toISOString(),...state.data},null,2), `apartman-onceki-yedek-${today()}.json`, 'application/json');
+      await api('restore', {backup}); await load(); modal.close(); shell(); toast('Yedek yüklendi.');
+    }, false, 'Yedeği Yükle');
+  } catch (error) { toast(error instanceof SyntaxError ? 'Yedek dosyası okunamadı. Geçerli bir JSON dosyası seçin.' : error.message, true); }
+}
+async function boot() { try { const session = await api('session'); state.passwordRequired = session.passwordRequired !== false; state.csrf = session.csrf || ''; if (!session.authenticated) { state.data = null; authView(session); return; } await load(); state.page = pageFromHash(); shell(); } catch (e) { $('#app').innerHTML = `<div class="initial-loading"><h2>${storageMode === 'browser' ? 'Tarayıcı kayıtları açılamadı' : 'Sunucuya bağlanılamadı'}</h2><p>${esc(e.message)}</p>${btn('Tekrar Dene', 'retry', 'refresh')}</div>`; } }
 document.addEventListener('click', async e => {
   const button = e.target.closest('[data-action]'); if (!button) return;
   const a = button.dataset.action, id = button.dataset.id;
@@ -217,6 +230,7 @@ document.addEventListener('click', async e => {
       case 'print': window.print(); break; case 'print-report': printReport(); break;
       case 'csv': download(csv(currentReport()), `apartman-${state.reportType}-${state.reportMonth || 'tum-donemler'}.csv`, 'text/csv;charset=utf-8'); break;
       case 'export': download(JSON.stringify({ exportedAt: new Date().toISOString(), ...state.data }, null, 2), `apartman-veriler-${today()}.json`, 'application/json'); toast('Veriler dışa aktarıldı.'); break;
+      case 'restore': $('#restore-file').click(); break;
       case 'password': if (state.passwordRequired) changePassword(); break;
       case 'refresh': button.disabled = true; await load(); render(); toast('Veriler güncellendi.'); break;
       case 'logout': await api('logout', {}); state.data = null; await boot(); break;
@@ -228,7 +242,8 @@ document.addEventListener('click', async e => {
   } catch (err) { toast(err.message, true); if (err.status === 401) { modal.close(); await boot(); } }
   finally { if (button.isConnected) button.disabled = false; }
 });
-document.addEventListener('change', e => {
+document.addEventListener('change', async e => {
+  if (e.target.id === 'restore-file') { await importBackup(e.target.files[0]); e.target.value = ''; return; }
   const id = e.target.id, value = e.target.value;
   if (id === 'period-filter' && /^\d{4}-\d{2}$/.test(value)) { state.month = value; render(); }
   if (id === 'status-filter') { state.status = value; render(); }
@@ -239,6 +254,6 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('input', e => { if (e.target.id === 'search') { const position = e.target.selectionStart; state.query = e.target.value; render(); const input = $('#search'); input.focus(); input.setSelectionRange(position, position); } });
 window.addEventListener('hashchange', () => { if (!state.data) return; state.page = pageFromHash(); state.query = ''; state.status = 'all'; state.unitFilter = ''; shell(); });
-window.addEventListener('offline', () => toast('Bağlantı kesildi. Kayıt yapmak için sunucu bağlantısı gerekiyor.', true));
+window.addEventListener('offline', () => toast(storageMode === 'browser' ? 'İnternet bağlantısı kesildi. Açık panelde kayıt yapmaya devam edebilirsiniz.' : 'Bağlantı kesildi. Kayıt yapmak için sunucu bağlantısı gerekiyor.', storageMode !== 'browser'));
 modal.addEventListener('click', e => { if (e.target === modal) { const r = modal.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) modal.close(); } });
 await boot();

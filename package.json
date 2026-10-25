@@ -3,15 +3,20 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=24.0.0" },
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "start": "node --env-file-if-exists=.env src/server.js",
     "dev": "node --env-file-if-exists=.env --watch src/server.js",
     "test": "node --test --test-isolation=none tests/*.test.js",
     "test:browser": "node --test --test-isolation=none tests/browser/*.test.js",
-    "check": "node --check src/server.js && node --check src/store.js && node --check src/auth.js && node --check src/validation.js && node --check public/app.js && node --check public/reports.js",
+    "check": "node --check src/server.js && node --check src/store.js && node --check src/auth.js && node --check src/validation.js && node --check public/app.js && node --check public/reports.js && node --check public/local-store.js && node --check public/local-db.js && node --check public/transport.js && node --check public/transport-browser.js && node --check scripts/build-free.js",
     "backup": "node --env-file-if-exists=.env scripts/backup.js",
-    "reset-password": "node --env-file-if-exists=.env scripts/reset-password.js"
+    "reset-password": "node --env-file-if-exists=.env scripts/reset-password.js",
+    "build:free": "node scripts/build-free.js"
   },
-  "devDependencies": { "playwright": "1.57.0" }
+  "devDependencies": {
+    "playwright": "1.57.0"
+  }
 }
