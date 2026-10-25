@@ -194,7 +194,7 @@ npx playwright install chromium
 npm run test:browser
 ```
 
-Mevcut Chromium kullanılacaksa `CHROMIUM_PATH` değişkenini ayarlayın. Tarayıcı testi ilk kurulum, daire ekleme, borçlandırma, kısmi tahsilat, gider, makbuz, CSV indirme, yeniden açılış ve mobil menüyü kapsar. Bu ortamda Chromium ağ/soket izninde engellendiği için yeni telefon/tema testi herkese açık deponun ücretsiz GitHub Actions ortamında gerçek Chromium ile çalıştırıldı ve geçti. 1440, 480, 390 ve 320 px genişlik; kısa/yatay ekran menüsü; açık/koyu tercihinin yenilemede ve daire kayıtlarının korunması doğrulandı. Ayrıntılar `.github/workflows/mobile-ui.yml` ve `npm run test:ui` komutundadır. Önceki tam sunucu tarayıcı akışı ayrı bir testtir.
+Mevcut Chromium kullanılacaksa `CHROMIUM_PATH` değişkenini ayarlayın. Tarayıcı testi ilk kurulum, daire ekleme, borçlandırma, kısmi tahsilat, gider, makbuz, CSV indirme, yeniden açılış ve mobil menüyü kapsar. Bu ortamda Chromium ağ/soket izninde engellendiği için yeni telefon/tema testi herkese açık deponun ücretsiz GitHub Actions ortamında gerçek Chromium ile çalıştırıldı ve geçti. 1440, 480, 390 ve 320 px genişlik; kısa/yatay ekran menüsü; açık/koyu tercihinin yenilemede ve daire kayıtlarının korunması doğrulandı. Ayrıntılar `.github/workflows/mobile-ui.yml` ve `npm run test:ui` komutundadır. Otomatik yedek testleri ayrıca eski IndexedDB kaydının korunmasını, geçmişten geri yüklemeyi, geçersiz geri yüklemede atomikliği, gerçek OPFS dosya API'leriyle JSON yazımını, disk hatasını ve iki sekmenin eşzamanlı kaydını doğrular. İşletim sisteminin gerçek klasör seçme/izin penceresi kullanıcı tarafından tamamlanır. Önceki tam sunucu tarayıcı akışı ayrı bir testtir.
 
 ## Kapsam sınırları
 
