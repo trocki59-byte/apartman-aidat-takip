@@ -1,0 +1,1 @@
+# apartman-aidat-takip
