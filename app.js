@@ -231,10 +231,11 @@ function closeOpening() {
 }
 function closeMenu() {
   $('.sidebar')?.classList.remove('open'); $('.nav-overlay')?.classList.remove('visible');
-  const trigger = $('.mobile-menu'); if (trigger) { trigger.setAttribute('aria-expanded','false'); trigger.focus(); }
+  const trigger = $('.mobile-menu'); if (trigger) { trigger.setAttribute('aria-expanded','false'); if (trigger.getClientRects().length) trigger.focus(); }
 }
+matchMedia('(min-width:960px)').addEventListener('change', () => { if ($('.sidebar.open')) closeMenu(); });
 document.addEventListener('keydown', e => {
-  const drawer = $('.sidebar.open'); if (!drawer) return;
+  const drawer = $('.sidebar.open'); if (!drawer || matchMedia('(min-width:960px)').matches) return;
   if (e.key === 'Escape') { e.preventDefault(); closeMenu(); return; }
   if (e.key !== 'Tab') return;
   const focusable = [...drawer.querySelectorAll('a[href],button:not([disabled])')], first = focusable[0], last = focusable.at(-1);

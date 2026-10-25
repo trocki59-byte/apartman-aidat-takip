@@ -32,3 +32,5 @@ Focus root cause identified: visibility itself was transitioning from hidden, ca
 Real Chromium verification GREEN: GitHub Actions run 40213554734, commit 9e09a22b6a69d2077c384b988f433a5fa9fd2254. Layout, theme persistence, retained IndexedDB unit, all requested widths, short-screen drawer scrolling, focus and Escape passed. Publishing generated root assets from that tested source.
 
 User requested TROÇKİ STUDİO at opening. Added theme-aware 1.2-second brand splash with skip button; app inert only until splash dismisses. Browser test checks brand presence and skip; existing reload flow covers auto-dismiss. No data/storage changes.
+
+User requested separate desktop layout after seeing phone-only view on PC. Added desktop breakpoint at960: full-width body, fixed sidebar, 4 cards at1200+, side-by-side dashboard and desktop dialogs/forms. Phone layout retained below960. Drawer state/focus trap clears on breakpoint changes. Browser test now asserts both desktop and mobile, theme persistence and resizing an open drawer.

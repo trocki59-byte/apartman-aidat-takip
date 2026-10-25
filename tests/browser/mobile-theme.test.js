@@ -6,7 +6,7 @@ import { resolve, extname } from 'node:path';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 
-test('telefon genişliği ve açık/koyu tercih sayfa yenilemede korunur',async t=>{
+test('bilgisayar ve telefon düzeni ile açık/koyu tercih korunur',async t=>{
   const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{}),args:['--no-sandbox','--disable-dev-shm-usage']});
   t.after(()=>browser.close());
   const context=await browser.newContext({viewport:{width:1440,height:1000},colorScheme:'light',locale:'tr-TR'});
@@ -22,17 +22,22 @@ test('telefon genişliği ve açık/koyu tercih sayfa yenilemede korunur',async 
   await page.getByRole('button',{name:'Devam et',exact:true}).click();
   assert.equal(await page.locator('#opening-splash').count(),0);
   await page.getByRole('heading',{name:'Genel Bakış',exact:true}).waitFor();
-  assert.ok(await page.evaluate(()=>document.body.getBoundingClientRect().width<=480));
-  assert.ok(await page.getByRole('button',{name:'Menüyü aç'}).isVisible());
+  assert.ok(await page.evaluate(()=>document.body.getBoundingClientRect().width>1000));
+  assert.ok(await page.locator('.sidebar').isVisible());
+  assert.equal(await page.getByRole('button',{name:'Menüyü aç'}).count(),0);
+  const cards=await page.locator('.stat').evaluateAll(items=>items.map(e=>e.getBoundingClientRect().top));
+  assert.equal(new Set(cards).size,1);
+  assert.equal(await page.locator('.quick-panel').isVisible(),true);
   const lightBackground=await page.locator('body').evaluate(e=>getComputedStyle(e).backgroundColor);
   await page.getByRole('button',{name:'Koyu temayı aç'}).click();
   assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
   const darkBackground=await page.locator('body').evaluate(e=>getComputedStyle(e).backgroundColor);
   assert.notEqual(darkBackground,lightBackground);
   mkdirSync('test-results',{recursive:true});
-  await page.screenshot({path:'test-results/phone-dark-desktop.png',fullPage:true});
+  await page.screenshot({path:'test-results/desktop-dark.png',fullPage:true});
   await page.reload();await page.getByRole('heading',{name:'Genel Bakış',exact:true}).waitFor();
   assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
+  await page.setViewportSize({width:390,height:844});
   await page.getByRole('button',{name:'Menüyü aç'}).click();
   await page.getByRole('link',{name:'Daireler',exact:true}).click();
   await page.getByRole('heading',{name:'Daireler',exact:true}).waitFor();
@@ -46,6 +51,7 @@ test('telefon genişliği ve açık/koyu tercih sayfa yenilemede korunur',async 
   await page.getByRole('cell',{name:'Daire 1',exact:true}).waitFor();
   for(const width of [320,390,480]){
     await page.setViewportSize({width,height:844});
+    assert.ok(await page.evaluate(()=>document.body.getBoundingClientRect().width<=480));
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),`viewport overflow at ${width}`);
   }
   await page.setViewportSize({width:390,height:844});
@@ -63,5 +69,12 @@ test('telefon genişliği ve açık/koyu tercih sayfa yenilemede korunur',async 
     assert.equal(await trigger.evaluate(e=>e===document.activeElement),true);
     assert.equal(await trigger.getAttribute('aria-expanded'),'false');
   }
+  await page.setViewportSize({width:390,height:844});
+  await page.getByRole('button',{name:'Menüyü aç'}).click();
+  await page.setViewportSize({width:1440,height:1000});
+  await page.waitForFunction(()=>!document.querySelector('.sidebar').classList.contains('open'));
+  assert.ok(await page.locator('.sidebar').isVisible());
+  assert.equal(await page.locator('.nav-overlay').isVisible(),false);
+  await page.screenshot({path:'test-results/desktop-light.png',fullPage:true});
   assert.deepEqual(errors,[]);
 });

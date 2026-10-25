@@ -4,7 +4,7 @@ Tek apartmanı yöneten kişi için Türkçe, mobil uyumlu web uygulaması. Saki
 
 ## Telefon düzeni ve tema
 
-Arayüz her ekranda en fazla 480 px genişliğinde ortalanır. Üst çubuktaki ay/güneş düğmesi açık ve koyu tema arasında geçiş yapar. İlk açılışta sistem tercihi kullanılır; seçiminiz bu tarayıcıda saklanır. Menü kısa ekranlarda kaydırılabilir; Escape veya kapat düğmesiyle kapanır.
+Telefonda arayüz en fazla 480 px genişliğinde ortalanır. 960 px ve üzerindeki bilgisayar ekranlarında tam genişlikli panel, sabit sol menü ve yan yana özet kartları gösterilir. Üst çubuktaki ay/güneş düğmesi açık ve koyu tema arasında geçiş yapar. İlk açılışta sistem tercihi kullanılır; seçiminiz bu tarayıcıda saklanır. Menü kısa ekranlarda kaydırılabilir; Escape veya kapat düğmesiyle kapanır.
 
 ## Ücretsiz internet sürümü
 
