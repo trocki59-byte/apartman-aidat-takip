@@ -39,7 +39,7 @@ test('parola kurtarma eski oturumları siler ve yeni özeti kaydeder', t => {
 });
 test('dış ağda ilk parola eksikken sunucu port açmadan durur', t => {
   const { path } = fixture(t);
-  const result = run('src/server.js', path, [], { HOST: '0.0.0.0', ADMIN_PASSWORD: '' });
+  const result = run('src/server.js', path, [], { HOST: '0.0.0.0', ADMIN_PASSWORD: '', PASSWORD_REQUIRED: 'true' });
   if (result.error?.code === 'EPERM') { t.skip('Ortam dış ağ dinleyici yapılandırmalı alt süreç başlatmayı engelliyor.'); return; }
   assert.equal(result.status, 1); assert.match(result.stderr, /ADMIN_PASSWORD/);
 });

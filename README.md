@@ -10,7 +10,7 @@ Tek apartmanı yöneten kişi için Türkçe, mobil uyumlu web uygulaması. Saki
 npm start
 ```
 
-Tarayıcıda **http://127.0.0.1:3000** adresini açın. İlk çalıştırmada en az 12 karakterlik yönetici parolası oluşturun. Parolayı güvenli bir yerde saklayın. Sonraki girişlerde bu parola kullanılır. Örnek mali kayıtlar eklenmez.
+Tarayıcıda **http://127.0.0.1:3000** adresini açın. Panel doğrudan açılır; parola veya ilk kurulum girişi gerekmez. Örnek mali kayıtlar eklenmez. **Uygulamaya ulaşabilen herkes kayıtları görüntüleyebilir ve değiştirebilir.**
 
 `index.html` dosyasını çift tıklayarak açmak yeterli değildir; uygulama sunucusunun çalışması gerekir.
 
@@ -32,7 +32,7 @@ Tarayıcıda **http://127.0.0.1:3000** adresini açın. İlk çalıştırmada en
 - Giderler: kategori, tarih, ödeme hesabı ve açıklama.
 - Kasa ve banka: iki hesap, ayrı açılış bakiyeleri ve hesaplar arası transfer.
 - Raporlar: borçlu daireler, tahsilatlar, giderler ve güncel daire bakiyeleri; dönem/daire filtreleri ve Excel uyumlu CSV.
-- Ayarlar: apartman bilgileri, parola değiştirme, JSON veri dışa aktarımı ve son 500 işlemin listesi.
+- Ayarlar: apartman bilgileri, erişim modu, JSON veri dışa aktarımı ve son 500 işlemin listesi. Parola değiştirme yalnızca isteğe bağlı parola modu açıkken görünür.
 - Mali iptaller: kayıt silinmez, gerekçe saklanır; bakiye ve ödeme dağılımları yeniden hesaplanır.
 
 ## Para ve borç kuralları
@@ -69,7 +69,11 @@ Bu komut SQLite `VACUUM INTO` kullanır; uygulama açıkken de tutarlı kopya ol
 
 Ayarlar'daki JSON dışa aktarımı mali verilerin inceleme kopyasıdır; parola ve oturum içermez, işlem geçmişi son 500 kayıtla sınırlıdır. **Tam yedek yerine geçmez ve JSON içe aktarma ekranı yoktur.** Otomatik zamanlanmış yedekleme bu sürümde kurulu değildir.
 
-## Parola ve güvenlik
+## Erişim ve isteğe bağlı parola
+
+Varsayılan `PASSWORD_REQUIRED=false`: kullanıcı talebiyle parola girişi kapalıdır. Uygulamaya ulaşabilen herkes tüm mali verileri okuyabilir ve değiştirebilir. Anonim tarayıcı oturumu ve CSRF doğrulaması sürer; bunlar kullanıcı kimlik doğrulaması sağlamaz. Sunucu yeniden başlatıldığında oturumlar sıfırlanır; mali veriler korunur.
+
+Parolayı yeniden etkinleştirmek için sunucuda `PASSWORD_REQUIRED=true` tanımlayıp yeniden başlatın. Aşağıdaki parola kuralları yalnızca bu mod için geçerlidir.
 
 Parola scrypt ile tuzlanarak özetlenir; açık hali saklanmaz. Oturum çerezi HttpOnly ve SameSite=Strict'tir. Oturumlar 8 saat geçerlidir. Yazma işlemleri kaynak ve CSRF doğrulaması gerektirir; giriş 15 dakikada 10 başarısız denemeyle sınırlandırılır.
 
@@ -90,16 +94,17 @@ Yeni parolayı komut satırı argümanına yazmayın veya kaynak koduna eklemeyi
 | `HOST` | `127.0.0.1`; yerel erişim |
 | `PORT` | `3000` |
 | `DB_PATH` | `./data/aidat.sqlite` |
-| `ADMIN_PASSWORD` | Dış ağda ilk çalıştırma için en az 12 karakter |
+| `PASSWORD_REQUIRED` | Varsayılan `false`; parola ile erişim için `true` |
+| `ADMIN_PASSWORD` | Parola modu açıksa dış ağdaki ilk çalıştırmada en az 12 karakter |
 | `PUBLIC_ORIGIN` | Dış yayındaki tam kaynak; ör. `https://aidat.example.com`, son `/` olmadan |
 | `SECURE_COOKIE` | HTTPS yayında `true` olmalı |
 | `RESET_ADMIN_PASSWORD` | Yalnızca yetkili parola sıfırlamada |
 
-İlk parolayı webden oluşturma yalnızca loopback adresinde çalışan yerel sunucuda açıktır. Dış ağa açılırken ilk parola sunucunun ortam değişkeninden tanımlanır. Sunucu yöneticisinin dosya/ortam erişimi güvenilir kabul edilir.
+Parola modu açıkken ilk parolayı webden oluşturma yalnızca loopback adresinde çalışan yerel sunucuda açıktır. Parolasız modda parola kurulumu ve değiştirme uçları kapalıdır. Dış ağa parola ile açılırken ilk parola sunucunun ortam değişkeninden tanımlanır. Sunucu yöneticisinin dosya/ortam erişimi güvenilir kabul edilir.
 
 ## Sunucuda yayın
 
-Node.js 24 destekli ve kalıcı diski olan bir sunucuda çalışır. Önüne HTTPS sağlayan bir reverse proxy koyun. `HOST=0.0.0.0`, `PUBLIC_ORIGIN=https://gercek-adresiniz` ve `SECURE_COOKIE=true` tanımlayın. İlk çalıştırmada `ADMIN_PASSWORD` gereklidir. Kaynak kontrolü, hatalı `PUBLIC_ORIGIN` tanımında giriş ve yazma işlemlerini reddeder.
+Node.js 24 destekli ve kalıcı diski olan bir sunucuda çalışır. Önüne HTTPS sağlayan bir reverse proxy koyun. `HOST=0.0.0.0`, `PUBLIC_ORIGIN=https://gercek-adresiniz` ve `SECURE_COOKIE=true` tanımlayın. `PASSWORD_REQUIRED=false` ile parola gerekmez. İsteğe bağlı parola modunda ilk dış ağ çalıştırmasında `ADMIN_PASSWORD` gerekir. Kaynak kontrolü, hatalı `PUBLIC_ORIGIN` tanımında giriş ve yazma işlemlerini reddeder.
 
 Docker örneği; ortam değişkenleri önceden güvenli şekilde tanımlanmış olmalıdır:
 
@@ -108,7 +113,7 @@ docker build -t apartman-aidat-takip .
 docker run -d --name aidat \
   -p 127.0.0.1:3000:3000 \
   -v aidat-data:/app/data \
-  -e ADMIN_PASSWORD -e PUBLIC_ORIGIN \
+  -e PUBLIC_ORIGIN \
   --restart unless-stopped \
   apartman-aidat-takip
 ```
@@ -117,7 +122,7 @@ Bu örnek HTTPS reverse proxy arkasında kullanım içindir. Üretim çerezi yal
 
 ### Render hazırlığı
 
-`render.yaml` dosyası Docker hizmeti, tek sunucu, 1 GB kalıcı disk ve HTTPS çerezi için hazırlandı. **Starter ve kalıcı disk ücretlidir; bu dosya henüz Render'da uygulanmadı.** Blueprint kurulurken `ADMIN_PASSWORD` değerini Render'ın gizli ortam değişkeni alanında tanımlayın; buraya veya GitHub'a yazmayın. Hizmetin gerçek URL'si belli olduğunda `PUBLIC_ORIGIN` değişkenini bu HTTPS adresine, sonunda `/` olmadan ayarlayın. Otomatik dağıtım kapalıdır; yayımlama kontrollü başlatılır. İlk dağıtım sonrası giriş, veri kaydı ve yeniden dağıtımda veri kalıcılığı ayrıca doğrulanmalıdır.
+`render.yaml` dosyası Docker hizmeti, tek sunucu, 1 GB kalıcı disk ve HTTPS çerezi için hazırlandı. **Starter ve kalıcı disk ücretlidir; bu dosya henüz Render'da uygulanmadı.** Blueprint `PASSWORD_REQUIRED=false` ile kurulur; parola tanımlama adımı yoktur. Parolayı sonradan etkinleştirmek isterseniz `PASSWORD_REQUIRED=true` ve `ADMIN_PASSWORD` değişkenlerini Render üzerinde ayarlayın. Hizmetin gerçek URL'si belli olduğunda `PUBLIC_ORIGIN` değişkenini bu HTTPS adresine, sonunda `/` olmadan ayarlayın. Otomatik dağıtım kapalıdır; yayımlama kontrollü başlatılır. İlk dağıtım sonrası giriş, veri kaydı ve yeniden dağıtımda veri kalıcılığı ayrıca doğrulanmalıdır.
 
 Sites yardımcıları bu çalışma ortamında bulunmadığı için bu proje Sites'a yayımlanmadı. Henüz canlı yayın bağlantısı yoktur.
 
@@ -149,7 +154,7 @@ npm run check
 
 Test ortamı ağ portu açmayı engellediği için HTTP testleri sunucunun gerçek HTTP ayrıştırıcısına bellek içi bağlantı üzerinden istek verir. Üretim sunucusu normal Node HTTP sunucusudur; test için API yolları atlanmaz.
 
-Son doğrulamada 21 test geçti; dış ağda sunucu başlatma alt süreç testi ortamın `EPERM` engeli nedeniyle atlandı. Sözdizimi kontrolleri geçti. Yedekleme ve parola sıfırlama gerçek SQLite dosyalarıyla test edildi.
+Son doğrulamada 24 test geçti; dış ağda sunucu başlatma alt süreç testi ortamın `EPERM` engeli nedeniyle atlandı. Sözdizimi kontrolleri geçti. Yedekleme ve parola sıfırlama gerçek SQLite dosyalarıyla test edildi.
 
 Tarayıcı akış testleri için geliştirme bağımlılığını ve Chromium'u yükleyin:
 
@@ -165,4 +170,4 @@ Mevcut Chromium kullanılacaksa `CHROMIUM_PATH` değişkenini ayarlayın. Taray�
 
 Çoklu apartman, sakin hesabı, çevrimiçi tahsilat, banka bağlantısı, SMS/e-posta gönderimi, otomatik gecikme faizi ve resmi e-fatura yoktur. Makbuz uygulama içi tahsilat dökümüdür.
 
-Kaynak incelemesinde belirlenen iki küçük kullanım sınırı: toplu borçlandırmada dönem değiştirilirse son ödeme tarihini de kontrol edin; formdayken 8 saatlik oturum dolarsa girişe dönmek için sayfayı yenileyin. Bu durumlar mali kaydın yetkisiz kaydedilmesine yol açmaz.
+Kaynak incelemesinde belirlenen iki küçük kullanım sınırı: toplu borçlandırmada dönem değiştirilirse son ödeme tarihini de kontrol edin; formdayken 8 saatlik tarayıcı oturumu dolarsa sayfayı yenileyin (parolasız modda panel doğrudan yeniden açılır). Bu durumlar mali kaydın yetkisiz kaydedilmesine yol açmaz.

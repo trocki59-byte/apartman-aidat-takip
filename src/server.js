@@ -8,9 +8,11 @@ import { ensure, InputError } from './validation.js';
 
 const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
 const assets = new Map([['/', ['index.html', 'text/html; charset=utf-8']], ['/app.js', ['app.js', 'text/javascript; charset=utf-8']], ['/reports.js', ['reports.js', 'text/javascript; charset=utf-8']], ['/styles.css', ['styles.css', 'text/css; charset=utf-8']], ['/favicon.svg', ['favicon.svg', 'image/svg+xml']]]);
-export function createApplication({ dbPath = resolve('data/aidat.sqlite'), adminPassword, allowSetup = true, publicOrigin, secureCookie = false } = {}) {
+export function createApplication({ dbPath = resolve('data/aidat.sqlite'), adminPassword, allowSetup = true, publicOrigin, secureCookie = false, passwordRequired = false } = {}) {
   const store = createStore(dbPath), { db } = store;
-  if (adminPassword && !db.prepare('SELECT id FROM admin WHERE id=1').get()) db.prepare('INSERT INTO admin(id,passwordHash) VALUES(1,?)').run(passwordHash(adminPassword));
+  // A restart may change the access mode; never reuse public sessions as logins.
+  db.prepare('DELETE FROM sessions').run();
+  if (passwordRequired && adminPassword && !db.prepare('SELECT id FROM admin WHERE id=1').get()) db.prepare('INSERT INTO admin(id,passwordHash) VALUES(1,?)').run(passwordHash(adminPassword));
   const auth = createAuth(db, secureCookie), attempts = new Map();
   const hasAdmin = () => !!db.prepare('SELECT id FROM admin WHERE id=1').get();
   function localSetupAllowed(req) {
@@ -47,8 +49,13 @@ export function createApplication({ dbPath = resolve('data/aidat.sqlite'), admin
       }
       if (path === '/api/session' && req.method === 'GET') {
         const session = auth.session(req);
-        json(res, 200, { authenticated: !!session, csrf: session?.csrf, setupRequired: !hasAdmin(), setupAllowed: localSetupAllowed(req) }); return;
+        if (!passwordRequired) {
+          const ready = session ? { authenticated: true, csrf: session.csrf } : auth.start(res);
+          json(res, 200, { ...ready, passwordRequired: false, setupRequired: false, setupAllowed: false }); return;
+        }
+        json(res, 200, { authenticated: !!session, csrf: session?.csrf, passwordRequired: true, setupRequired: !hasAdmin(), setupAllowed: localSetupAllowed(req) }); return;
       }
+      if (!passwordRequired && ['/api/setup', '/api/login', '/api/password'].includes(path)) throw new InputError('Parola ile giriş devre dışı.', 404);
       if (path === '/api/setup' && req.method === 'POST') {
         ensure(!hasAdmin() && localSetupAllowed(req), 'Kurulum sunucu üzerinden yapılmalıdır.', 403);
         const p = await body(req);
@@ -94,8 +101,9 @@ export function createApplication({ dbPath = resolve('data/aidat.sqlite'), admin
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const host = process.env.HOST || '127.0.0.1', port = Number(process.env.PORT || 3000);
   const allowSetup = host === '127.0.0.1';
-  const app = createApplication({ dbPath: process.env.DB_PATH || resolve('data/aidat.sqlite'), adminPassword: process.env.ADMIN_PASSWORD, allowSetup, publicOrigin: process.env.PUBLIC_ORIGIN, secureCookie: process.env.SECURE_COOKIE === 'true' });
-  if (!allowSetup && !app.store.db.prepare('SELECT id FROM admin WHERE id=1').get()) {
+  const passwordRequired = process.env.PASSWORD_REQUIRED === 'true';
+  const app = createApplication({ dbPath: process.env.DB_PATH || resolve('data/aidat.sqlite'), adminPassword: process.env.ADMIN_PASSWORD, allowSetup, publicOrigin: process.env.PUBLIC_ORIGIN, secureCookie: process.env.SECURE_COOKIE === 'true', passwordRequired });
+  if (passwordRequired && !allowSetup && !app.store.db.prepare('SELECT id FROM admin WHERE id=1').get()) {
     console.error('Dış ağda ilk çalıştırma için ADMIN_PASSWORD (en az 12 karakter) ayarlayın.'); app.store.close(); process.exit(1);
   }
   app.server.listen(port, host, () => console.log(`Apartman Aidat Takip: http://${host}:${port}`));

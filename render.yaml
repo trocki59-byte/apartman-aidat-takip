@@ -8,7 +8,7 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     autoDeploy: false
-    healthCheckPath: /api/session
+    healthCheckPath: /
     envVars:
       - key: HOST
         value: 0.0.0.0
@@ -18,8 +18,8 @@ services:
         value: /app/data/aidat.sqlite
       - key: SECURE_COOKIE
         value: "true"
-      - key: ADMIN_PASSWORD
-        sync: false
+      - key: PASSWORD_REQUIRED
+        value: "false"
     disk:
       name: aidat-verileri
       mountPath: /app/data

@@ -8,7 +8,7 @@ const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 
 test('yönetici kurulumdan rapora tüm mali akışı tamamlar ve mobil menü çalışır', async t => {
-  const app = createApplication({ dbPath: ':memory:' });
+  const app = createApplication({ dbPath: ':memory:', passwordRequired: true });
   t.after(() => app.store.close());
   const browser = await chromium.launch({ headless: true, ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}), args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   t.after(() => browser.close());

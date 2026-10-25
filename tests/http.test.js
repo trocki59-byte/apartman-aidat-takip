@@ -2,9 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createApplication } from '../src/server.js';
 import { inject } from './inject.js';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 async function fixture(t, options = {}) {
-  const app = createApplication({ dbPath: ':memory:', ...options });
+  const app = createApplication({ dbPath: ':memory:', passwordRequired: true, ...options });
   const origin = 'http://127.0.0.1';
   t.after(() => { app.store.close(); });
   let cookie = '', csrf = '';
@@ -73,4 +76,36 @@ test('HTML, modül, stil ve simge doğru içerik türleriyle sunulur', async t =
     assert.ok(r.body.length > 50); assert.ok(r.headers.get('content-security-policy').includes("script-src 'self'"));
   }
   assert.equal((await inject(app.server, { path: '/src/server.js' })).status, 404);
+});
+test('varsayılan açılış parola istemez ve doğrudan panel oturumu verir', async t => {
+  const app = createApplication({ dbPath: ':memory:' }); t.after(() => app.store.close());
+  const r = await inject(app.server, { path: '/api/session' });
+  const session = JSON.parse(r.body);
+  assert.equal(session.passwordRequired, false);
+  assert.equal(session.authenticated, true);
+  assert.equal(session.setupRequired, false);
+  assert.ok(session.csrf);
+  assert.match(r.headers.get('set-cookie'), /HttpOnly/);
+});
+test('parolasız modda kayıt yapılır; kaynak ve CSRF kontrolü devam eder', async t => {
+  const { request } = await fixture(t, { passwordRequired: false, allowSetup: false });
+  await request('/api/session');
+  assert.equal((await request('/api/data')).status, 200);
+  const payload = { action: 'unit.save', payload: { number: '1', owner: '', resident: '', phone: '', monthlyCents: 200000, active: true } };
+  assert.equal((await request('/api/actions', payload, { 'X-CSRF-Token': '' })).status, 403);
+  assert.equal((await request('/api/actions', payload, { Origin: 'https://evil.example' })).status, 403);
+  assert.equal((await request('/api/actions', payload)).status, 200);
+  assert.equal((await request('/api/data')).data.units.length, 1);
+  for (const path of ['setup', 'login', 'password']) assert.equal((await request('/api/' + path, { password: 'unused' })).status, 404);
+});
+test('parola tekrar etkinleşince önceki parolasız oturum giriş yapmış sayılmaz', async t => {
+  const dir = mkdtempSync(join(tmpdir(), 'aidat-mode-')); t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const dbPath = join(dir, 'aidat.sqlite');
+  const first = createApplication({ dbPath });
+  const session = await inject(first.server, { path: '/api/session' });
+  const cookie = session.headers.get('set-cookie').split(';')[0]; first.store.close();
+  const second = createApplication({ dbPath, passwordRequired: true, adminPassword: password }); t.after(() => second.store.close());
+  const check = await inject(second.server, { path: '/api/session', headers: { Cookie: cookie } });
+  assert.equal(JSON.parse(check.body).authenticated, false);
+  assert.equal((await inject(second.server, { path: '/api/data', headers: { Cookie: cookie } })).status, 401);
 });

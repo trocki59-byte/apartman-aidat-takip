@@ -6,7 +6,7 @@ COPY --chown=node:node public ./public
 COPY --chown=node:node scripts ./scripts
 RUN mkdir -p /app/data /app/outputs && chown -R node:node /app/data /app/outputs
 USER node
-ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000 DB_PATH=/app/data/aidat.sqlite SECURE_COOKIE=true
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000 DB_PATH=/app/data/aidat.sqlite SECURE_COOKIE=true PASSWORD_REQUIRED=false
 EXPOSE 3000
 VOLUME ["/app/data"]
 CMD ["node", "src/server.js"]
