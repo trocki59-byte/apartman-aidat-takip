@@ -8,9 +8,9 @@ Tek apartmanı yöneten kişi için Türkçe, mobil uyumlu web uygulaması. Saki
 
 Ayarlar → **Yedek İndir** ile JSON yedeğini düzenli olarak saklayın. Yeni cihazda aynı siteyi açıp Ayarlar → **Yedek Yükle** kullanın. Yükleme mevcut kayıtların yerine geçer; işlem öncesinde eski kayıtlarınızın kopyası indirilir. Geçersiz yedek kaydedilmez. Veriler ve yedekler GitHub'a veya yayın sunucusuna gönderilmez.
 
-Statik dosyaları üretmek için `npm run build:free` çalıştırın. `dist/` içeriği GitHub Pages'te alt dizinde çalışacak biçimdedir; Pages için `.nojekyll` bulunur. Uygulama açıldıktan sonra bağlantı kesilirse açık panelde kayıt yapabilirsiniz; çevrimdışı yeniden açılış garantisi yoktur.
+Statik dosyaları üretmek için `npm run build:free` çalıştırın. `npm run prepare:pages` komutu aynı dosyaları `main` dalının köküne de kopyalar; arayüzü değiştirdikten sonra yayın dosyalarını bu komutla güncelleyin. Düzenlemeleri kökteki üretilmiş dosyalar yerine `public/` altında yapın. `dist/` içeriği GitHub Pages'te alt dizinde çalışacak biçimdedir; Pages için `.nojekyll` bulunur. Uygulama açıldıktan sonra bağlantı kesilirse açık panelde kayıt yapabilirsiniz; çevrimdışı yeniden açılış garantisi yoktur.
 
-GitHub Pages kurulumu: ücretsiz GitHub hesabında depo herkese açık olmalı; Settings → Pages → Deploy from a branch → `gh-pages` / `(root)` → Save. `gh-pages` dalı yalnızca üretilmiş statik uygulama dosyalarını içerir. Kaynak depo görünürlüğü kullanıcı onayı olmadan değiştirilmez. Henüz doğrulanmamış bir yayın adresi canlı site olarak sunulmaz.
+GitHub Pages kurulumu: ücretsiz GitHub hesabında depo herkese açık olmalı; Settings → Pages → Deploy from a branch → `main` / `(root)` → Save. `gh-pages` dalı da aynı statik sürümü içerir. `gh-pages` dalı yalnızca üretilmiş statik uygulama dosyalarını içerir. Kaynak depo görünürlüğü kullanıcı onayı olmadan değiştirilmez. Henüz doğrulanmamış bir yayın adresi canlı site olarak sunulmaz.
 
 Aşağıdaki Node.js/SQLite talimatları yerel sunucu sürümü içindir; ücretsiz statik yayında uygulanmaz.
 
@@ -153,7 +153,7 @@ npm start
 
 ZIP dosyası Git geçmişini içermez; güncel kod ve geçmiş için depoyu klonlayın.
 
-Veri dosyaları, parolalar, yedekler ve test çıktıları depoya girmez. GitHub Pages `gh-pages` dalındaki ücretsiz tarayıcı sürümünü çalıştırabilir; Node.js/SQLite sunucu sürümünü çalıştırmaz.
+Veri dosyaları, parolalar, yedekler ve test çıktıları depoya girmez. GitHub Pages depo kökündeki veya `gh-pages` dalındaki ücretsiz tarayıcı sürümünü çalıştırabilir; Node.js/SQLite sunucu sürümünü çalıştırmaz.
 
 ## Kontroller
 

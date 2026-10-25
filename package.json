@@ -14,7 +14,8 @@
     "check": "node --check src/server.js && node --check src/store.js && node --check src/auth.js && node --check src/validation.js && node --check public/app.js && node --check public/reports.js && node --check public/local-store.js && node --check public/local-db.js && node --check public/transport.js && node --check public/transport-browser.js && node --check scripts/build-free.js",
     "backup": "node --env-file-if-exists=.env scripts/backup.js",
     "reset-password": "node --env-file-if-exists=.env scripts/reset-password.js",
-    "build:free": "node scripts/build-free.js"
+    "build:free": "node scripts/build-free.js",
+    "prepare:pages": "node scripts/prepare-pages.js"
   },
   "devDependencies": {
     "playwright": "1.57.0"
