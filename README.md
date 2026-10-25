@@ -2,6 +2,10 @@
 
 Tek apartmanı yöneten kişi için Türkçe, mobil uyumlu web uygulaması. Sakin girişi yoktur. Lacivert ve turkuaz yönetici paneli; gerçek kayıtlarla çalışan sekiz ekran.
 
+## Telefon düzeni ve tema
+
+Arayüz her ekranda en fazla 480 px genişliğinde ortalanır. Üst çubuktaki ay/güneş düğmesi açık ve koyu tema arasında geçiş yapar. İlk açılışta sistem tercihi kullanılır; seçiminiz bu tarayıcıda saklanır. Menü kısa ekranlarda kaydırılabilir; Escape veya kapat düğmesiyle kapanır.
+
 ## Ücretsiz internet sürümü
 
 Ücretsiz statik sürüm GitHub Pages için hazırlanmıştır. Parola, sunucu veya ücretli disk gerekmez. **Mali kayıtlar yalnızca kullandığınız cihazdaki tarayıcıda IndexedDB içinde saklanır; cihazlar arasında otomatik eşitlenmez.** Siteyi başka cihazda açınca ayrı, boş kayıt alanı görülür. Gizli gezinme kullanmayın; tarayıcı/site verilerini temizlemek kayıtları siler.

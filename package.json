@@ -11,11 +11,12 @@
     "dev": "node --env-file-if-exists=.env --watch src/server.js",
     "test": "node --test --test-isolation=none tests/*.test.js",
     "test:browser": "node --test --test-isolation=none tests/browser/*.test.js",
-    "check": "node --check src/server.js && node --check src/store.js && node --check src/auth.js && node --check src/validation.js && node --check public/app.js && node --check public/reports.js && node --check public/local-store.js && node --check public/local-db.js && node --check public/transport.js && node --check public/transport-browser.js && node --check scripts/build-free.js",
+    "check": "node --check src/server.js && node --check src/store.js && node --check src/auth.js && node --check src/validation.js && node --check public/app.js && node --check public/reports.js && node --check public/local-store.js && node --check public/local-db.js && node --check public/transport.js && node --check public/transport-browser.js && node --check scripts/build-free.js && node --check public/theme.js",
     "backup": "node --env-file-if-exists=.env scripts/backup.js",
     "reset-password": "node --env-file-if-exists=.env scripts/reset-password.js",
     "build:free": "node scripts/build-free.js",
-    "prepare:pages": "node scripts/prepare-pages.js"
+    "prepare:pages": "node scripts/prepare-pages.js",
+    "test:ui": "npm run build:free && node --test --test-isolation=none tests/browser/mobile-theme.test.js"
   },
   "devDependencies": {
     "playwright": "1.57.0"

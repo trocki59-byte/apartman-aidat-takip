@@ -1,9 +1,13 @@
+import { initializeTheme, getTheme, toggleTheme } from './theme.js';
 import { request, storageMode } from './transport.js';
 import { money, numberInput, displayDate, today, parseMoney, csv, overview, reportRows } from './reports.js';
 
+initializeTheme();
 const $ = (s, root = document) => root.querySelector(s);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const paths = {
+ sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/>',
+ moon: '<path d="M21 13a9 9 0 0 1-10-10 9 9 0 1 0 10 10Z"/>',
  building: '<path d="M4 21V5l10-3v19M14 9h6v12M2 21h20M8 7h2m-2 4h2m-2 4h2m7-2h1m-1 4h1"/>',
  home: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/>',
  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m20 0v-2a4 4 0 0 0-3-3.87M16 3a4 4 0 0 1 0 8"/><circle cx="9" cy="7" r="4"/>',
@@ -30,6 +34,7 @@ const paths = {
  menu: '<path d="M4 6h16M4 12h16M4 18h16"/>', refresh: '<path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 7a7 7 0 0 1 12-1l2 6M4 12l2 6a7 7 0 0 0 12-1"/>',
 };
 const icon = name => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.file}</svg>`;
+const themeButton = () => `<button type="button" class="icon-button theme-toggle" data-action="theme" aria-label="${getTheme() === 'dark' ? 'Açık temayı aç' : 'Koyu temayı aç'}" aria-pressed="${getTheme() === 'dark'}" title="${getTheme() === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'}">${icon(getTheme() === 'dark' ? 'sun' : 'moon')}<span>${getTheme() === 'dark' ? 'Açık' : 'Koyu'}</span></button>`;
 const brand = () => `<div class="brand"><svg class="brand-mark" viewBox="0 0 40 48" fill="none" aria-hidden="true"><path d="M7 43V12L25 5v38M25 21h10v22M3 43h35M13 16h5m-5 9h5m-5 9h5m12-7h2m-2 8h2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><div><strong>Apartman Yönetimi</strong><small>AİDAT TAKİP SİSTEMİ</small></div></div>`;
 const navItems = [['dashboard', 'Genel Bakış', 'home'], ['units', 'Daireler', 'users'], ['charges', 'Aidatlar', 'file'], ['payments', 'Tahsilatlar', 'card'], ['expenses', 'Giderler', 'bars'], ['accounts', 'Kasa ve Banka', 'bank'], ['reports', 'Raporlar', 'chart'], ['settings', 'Ayarlar', 'settings']];
 const descriptions = { dashboard: 'Apartmanınızın mali durumunu tek ekrandan takip edin.', units: 'Daire, malik ve sakin bilgilerini yönetin.', charges: 'Aylık aidatları oluşturun, borç durumlarını takip edin.', payments: 'Ödemeleri kaydedin, makbuzları görüntüleyin.', expenses: 'Apartman giderlerini düzenli ve şeffaf biçimde takip edin.', accounts: 'Nakit kasa ve banka hesaplarınızın güncel durumu.', reports: 'Kayıtları filtreleyin, raporlayın ve dışa aktarın.', settings: 'Apartman bilgileri, güvenlik ve işlem geçmişi.' };
@@ -63,7 +68,7 @@ const noteField = (value = '', required = false) => `<label class="field">Açık
 function rowVoid(type, id) { return iconBtn('Kaydı iptal et', 'void', 'cancel', id, `data-type="${type}"`); }
 function shell() {
   const current = navItems.find(n => n[0] === state.page) || navItems[0];
-  $('#app').innerHTML = `<div class="nav-overlay" data-action="close-menu"></div><aside class="sidebar" aria-label="Ana gezinme">${brand()}<div class="nav-label">YÖNETİM PANELİ</div><nav class="nav">${navItems.map(([id, label, ico]) => `<a href="#${id}" class="${state.page === id ? 'active' : ''}" ${state.page === id ? 'aria-current="page"' : ''}>${icon(ico)}${label}</a>`).join('')}</nav><div class="sidebar-bottom"><div class="avatar">${icon('users')}</div><div><strong>Yönetici</strong><small>Tek apartman yönetimi</small></div>${state.passwordRequired ? iconBtn('Çıkış yap', 'logout', 'logout', '') : ''}</div></aside><div class="workspace"><header class="topbar"><div class="breadcrumb"><button class="icon-button mobile-menu" data-action="menu" aria-label="Menüyü aç">${icon('menu')}</button><span>${esc(state.data.settings.name)}</span>${icon('arrow')}<strong>${current[1]}</strong></div><div class="top-meta"><span class="private-label">${icon(state.passwordRequired ? 'lock' : 'info')} ${state.passwordRequired ? 'Yalnızca yönetici erişimi' : storageMode === 'browser' ? 'Bu tarayıcıdaki kayıtlar' : 'Parolasız erişim'}</span><span class="top-date">${new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>${iconBtn('Verileri yenile', 'refresh', 'refresh', '')}</div></header><main class="main" id="main" tabindex="-1"></main></div>`;
+  $('#app').innerHTML = `<div class="nav-overlay" data-action="close-menu"></div><aside class="sidebar" aria-label="Ana gezinme">${brand()}<button type="button" class="icon-button drawer-close" data-action="close-menu" aria-label="Menüyü kapat">${icon('close')}</button><div class="nav-label">YÖNETİM PANELİ</div><nav class="nav">${navItems.map(([id, label, ico]) => `<a href="#${id}" class="${state.page === id ? 'active' : ''}" ${state.page === id ? 'aria-current="page"' : ''}>${icon(ico)}${label}</a>`).join('')}</nav><div class="sidebar-bottom"><div class="avatar">${icon('users')}</div><div><strong>Yönetici</strong><small>Tek apartman yönetimi</small></div>${state.passwordRequired ? iconBtn('Çıkış yap', 'logout', 'logout', '') : ''}</div></aside><div class="workspace"><header class="topbar"><div class="breadcrumb"><button class="icon-button mobile-menu" data-action="menu" aria-label="Menüyü aç" aria-expanded="false">${icon('menu')}</button><span>${esc(state.data.settings.name)}</span>${icon('arrow')}<strong>${current[1]}</strong></div><div class="top-meta"><span class="private-label">${icon(state.passwordRequired ? 'lock' : 'info')} ${state.passwordRequired ? 'Yalnızca yönetici erişimi' : storageMode === 'browser' ? 'Bu tarayıcıdaki kayıtlar' : 'Parolasız erişim'}</span><span class="top-date">${new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>${themeButton()}${iconBtn('Verileri yenile', 'refresh', 'refresh', '')}</div></header><main class="main" id="main" tabindex="-1"></main></div>`;
   render();
 }
 function heading() {
@@ -218,11 +223,25 @@ async function importBackup(file) {
   } catch (error) { toast(error instanceof SyntaxError ? 'Yedek dosyası okunamadı. Geçerli bir JSON dosyası seçin.' : error.message, true); }
 }
 async function boot() { try { const session = await api('session'); state.passwordRequired = session.passwordRequired !== false; state.csrf = session.csrf || ''; if (!session.authenticated) { state.data = null; authView(session); return; } await load(); state.page = pageFromHash(); shell(); } catch (e) { $('#app').innerHTML = `<div class="initial-loading"><h2>${storageMode === 'browser' ? 'Tarayıcı kayıtları açılamadı' : 'Sunucuya bağlanılamadı'}</h2><p>${esc(e.message)}</p>${btn('Tekrar Dene', 'retry', 'refresh')}</div>`; } }
+function closeMenu() {
+  $('.sidebar')?.classList.remove('open'); $('.nav-overlay')?.classList.remove('visible');
+  const trigger = $('.mobile-menu'); if (trigger) { trigger.setAttribute('aria-expanded','false'); trigger.focus(); }
+}
+document.addEventListener('keydown', e => {
+  const drawer = $('.sidebar.open'); if (!drawer) return;
+  if (e.key === 'Escape') { e.preventDefault(); closeMenu(); return; }
+  if (e.key !== 'Tab') return;
+  const focusable = [...drawer.querySelectorAll('a[href],button:not([disabled])')], first = focusable[0], last = focusable.at(-1);
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
 document.addEventListener('click', async e => {
+  if (e.target.closest('.sidebar .nav a')) closeMenu();
   const button = e.target.closest('[data-action]'); if (!button) return;
   const a = button.dataset.action, id = button.dataset.id;
   try {
     switch (a) {
+      case 'theme': { toggleTheme(); const next = document.createElement('template'); next.innerHTML = themeButton(); const fresh = next.content.firstElementChild; button.innerHTML = fresh.innerHTML; for (const name of ['aria-label','aria-pressed','title']) button.setAttribute(name, fresh.getAttribute(name)); break; }
       case 'unit': openUnit(id); break; case 'batch': openBatch(); break; case 'extra': openExtra(); break;
       case 'payment': openPayment(id, button.dataset.charge); break; case 'expense': openExpense(); break;
       case 'transfer': openTransfer(); break; case 'opening': openOpening(id); break; case 'void': openVoid(button.dataset.type, id); break;
@@ -234,8 +253,8 @@ document.addEventListener('click', async e => {
       case 'password': if (state.passwordRequired) changePassword(); break;
       case 'refresh': button.disabled = true; await load(); render(); toast('Veriler güncellendi.'); break;
       case 'logout': await api('logout', {}); state.data = null; await boot(); break;
-      case 'menu': $('.sidebar').classList.add('open'); $('.nav-overlay').classList.add('visible'); break;
-      case 'close-menu': $('.sidebar').classList.remove('open'); $('.nav-overlay').classList.remove('visible'); break;
+      case 'menu': $('.sidebar').classList.add('open'); $('.nav-overlay').classList.add('visible'); button.setAttribute('aria-expanded','true'); $('.drawer-close').focus(); break;
+      case 'close-menu': closeMenu(); break;
       case 'toggle-password': { const input = $('[name="password"]'); input.type = input.type === 'password' ? 'text' : 'password'; button.setAttribute('aria-label', input.type === 'password' ? 'Parolayı göster' : 'Parolayı gizle'); break; }
       case 'retry': await boot(); break;
     }
