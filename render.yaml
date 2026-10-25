@@ -1,0 +1,26 @@
+# Kalıcı disk kullanan ücretli Starter planı; henüz hizmet oluşturulmadı.
+services:
+  - type: web
+    name: apartman-aidat-takip
+    runtime: docker
+    plan: starter
+    numInstances: 1
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeploy: false
+    healthCheckPath: /api/session
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /app/data/aidat.sqlite
+      - key: SECURE_COOKIE
+        value: "true"
+      - key: ADMIN_PASSWORD
+        sync: false
+    disk:
+      name: aidat-verileri
+      mountPath: /app/data
+      sizeGB: 1
