@@ -51,7 +51,8 @@ test('telefon genişliği ve açık/koyu tercih sayfa yenilemede korunur',async 
     await page.setViewportSize(viewport);
     const trigger=page.getByRole('button',{name:'Menüyü aç'}); await trigger.click();
     const close=page.getByRole('button',{name:'Menüyü kapat'});
-    assert.equal(await close.evaluate(e=>e===document.activeElement),true);
+    await page.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === 'Menüyü kapat');
+    assert.equal(await close.evaluate(e=>e===document.activeElement),true,JSON.stringify(viewport));
     const settings=page.getByRole('link',{name:'Ayarlar',exact:true}); await settings.scrollIntoViewIfNeeded();
     const box=await settings.boundingBox(); assert.ok(box.y>=0&&box.y+box.height<=viewport.height,'drawer item outside short viewport');
     await page.keyboard.press('Escape');

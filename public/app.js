@@ -253,7 +253,7 @@ document.addEventListener('click', async e => {
       case 'password': if (state.passwordRequired) changePassword(); break;
       case 'refresh': button.disabled = true; await load(); render(); toast('Veriler güncellendi.'); break;
       case 'logout': await api('logout', {}); state.data = null; await boot(); break;
-      case 'menu': $('.sidebar').classList.add('open'); $('.nav-overlay').classList.add('visible'); button.setAttribute('aria-expanded','true'); $('.drawer-close').focus(); break;
+      case 'menu': $('.sidebar').classList.add('open'); $('.nav-overlay').classList.add('visible'); button.setAttribute('aria-expanded','true'); requestAnimationFrame(() => { if ($('.sidebar.open')) $('.drawer-close').focus(); }); break;
       case 'close-menu': closeMenu(); break;
       case 'toggle-password': { const input = $('[name="password"]'); input.type = input.type === 'password' ? 'text' : 'password'; button.setAttribute('aria-label', input.type === 'password' ? 'Parolayı göster' : 'Parolayı gizle'); break; }
       case 'retry': await boot(); break;
