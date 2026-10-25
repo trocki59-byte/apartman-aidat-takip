@@ -51,7 +51,8 @@ test('telefon genişliği ve açık/koyu tercih sayfa yenilemede korunur',async 
     await page.setViewportSize(viewport);
     const trigger=page.getByRole('button',{name:'Menüyü aç'}); await trigger.click();
     const close=page.getByRole('button',{name:'Menüyü kapat'});
-    await page.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === 'Menüyü kapat');
+    try { await page.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === 'Menüyü kapat', null, {timeout:3000}); }
+    catch(error) { console.log('DRAWER_DIAGNOSTIC',JSON.stringify(await page.evaluate(() => { const s=document.querySelector('.sidebar'),c=document.querySelector('.drawer-close');return {viewport:{width:innerWidth,height:innerHeight},active:document.activeElement?.outerHTML,sidebarClass:s.className,sidebarVisibility:getComputedStyle(s).visibility,closeVisibility:getComputedStyle(c).visibility,closeRect:c.getBoundingClientRect().toJSON(),sidebarScroll:s.scrollTop,modalOpen:document.querySelector('dialog').open};})));throw error; }
     assert.equal(await close.evaluate(e=>e===document.activeElement),true,JSON.stringify(viewport));
     const settings=page.getByRole('link',{name:'Ayarlar',exact:true}); await settings.scrollIntoViewIfNeeded();
     const box=await settings.boundingBox(); assert.ok(box.y>=0&&box.y+box.height<=viewport.height,'drawer item outside short viewport');
