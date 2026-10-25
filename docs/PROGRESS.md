@@ -34,3 +34,5 @@ Real Chromium verification GREEN: GitHub Actions run 40213554734, commit 9e09a22
 User requested TROÇKİ STUDİO at opening. Added theme-aware 1.2-second brand splash with skip button; app inert only until splash dismisses. Browser test checks brand presence and skip; existing reload flow covers auto-dismiss. No data/storage changes.
 
 User requested separate desktop layout after seeing phone-only view on PC. Added desktop breakpoint at960: full-width body, fixed sidebar, 4 cards at1200+, side-by-side dashboard and desktop dialogs/forms. Phone layout retained below960. Drawer state/focus trap clears on breakpoint changes. Browser test now asserts both desktop and mobile, theme persistence and resizing an open drawer.
+
+Automatic backup implementation: 30 Istanbul-day checkpoints +10 pre-action states, atomic IndexedDB v2 migration, optional file-folder backups serialized across tabs. Important review found no issues. Policy and real filesystem tests pass; Chromium migration/restore/OPFS-file-failure/cross-tab tests prepared before publication. Explicit app-open-only and same-browser limitations in UI and README.

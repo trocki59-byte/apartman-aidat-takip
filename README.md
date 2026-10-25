@@ -18,6 +18,20 @@ GitHub Pages kurulumu: ücretsiz GitHub hesabında depo herkese açık olmalı; 
 
 Aşağıdaki Node.js/SQLite talimatları yerel sunucu sürümü içindir; ücretsiz statik yayında uygulanmaz.
 
+## Otomatik yedekleme — ücretsiz internet sürümü
+
+Otomatik tarayıcı yedeği varsayılan olarak açıktır. Her başarılı değişiklikte işlem öncesi sürüm ve güncel günlük sürüm, asıl kayıtla aynı işlemde saklanır. Son 30 günlük yedek ve son 10 işlem öncesi sürüm korunur; gün sınırı İstanbul saatidir. Program yeni bir günde açıldığında da günlük sürüm alınır. **Ayarlar → Otomatik Yedekleme → Yedek Geçmişini Aç** bölümünden indirebilir veya geri yükleyebilirsiniz. Geri yükleme öncesi mevcut durum ayrıca korunur.
+
+Tarayıcı içi yedek, site verileri temizlenirse asıl kayıtlarla birlikte silinir. Bilgisayarda Chrome/Edge gibi destekleyen tarayıcılarda dosya yedeğini de açın:
+
+1. **Ayarlar → Yedek Klasörü Seç** düğmesine basın.
+2. Bilgisayarda bir klasör seçip tarayıcının yazma iznini onaylayın.
+3. Program, bu klasörde `TROCKI-Aidat-Yedekleri` alt klasörünü oluşturur. Her kayıt değişikliğinde `trocki-aidat-son-yedek.json` ve günün JSON dosyası otomatik güncellenir. En son 30 günlük dosya korunur; ilgisiz dosyalara dokunulmaz.
+
+Klasör izni her açılışta tarayıcı tarafından yeniden istenebilir. Program izin penceresini kendiliğinden açmaz; uyarı çıkarsa **Klasöre Yeniden İzin Ver** düğmesine basın. Dosya yazılamazsa mali kayıt ve tarayıcı içi yedek korunur; ekranda yedek hatası görünür. Birden fazla açık sekmenin dosya yazımları sıraya alınır. Klasör bağlantısını kaldırmak yedek dosyalarını silmez.
+
+**Program kapalıyken zamanlanmış işlem ve bulut eşitleme yoktur.** Klasöre otomatik yazma desteklenmeyen tarayıcılarda iç yedekleme devam eder; dış dosya için Yedek İndir kullanılır. Yerel klasör tanıtıcısı sadece bu tarayıcıda saklanır, GitHub'a veya JSON dosyasına aktarılmaz. Mevcut tarayıcı kayıtları sürüm güncellemesinde korunur.
+
 ## Yerel sunucu: hızlı başlangıç
 
 **Gereken:** Node.js 24 veya üzeri. Normal kullanımda npm paketi yüklemek gerekmez; uygulamanın üretim bağımlılığı yoktur.
@@ -170,7 +184,7 @@ npm run check
 
 Test ortamı ağ portu açmayı engellediği için HTTP testleri sunucunun gerçek HTTP ayrıştırıcısına bellek içi bağlantı üzerinden istek verir. Üretim sunucusu normal Node HTTP sunucusudur; test için API yolları atlanmaz.
 
-Son doğrulamada 29 test geçti; dış ağda sunucu başlatma alt süreç testi ortamın `EPERM` engeli nedeniyle atlandı. Sözdizimi kontrolleri geçti. Yedekleme ve parola sıfırlama gerçek SQLite dosyalarıyla test edildi.
+Son doğrulamada 35 test geçti; dış ağda sunucu başlatma alt süreç testi ortamın `EPERM` engeli nedeniyle atlandı. Sözdizimi kontrolleri geçti. Yedekleme ve parola sıfırlama gerçek SQLite dosyalarıyla test edildi.
 
 Tarayıcı akış testleri için geliştirme bağımlılığını ve Chromium'u yükleyin:
 

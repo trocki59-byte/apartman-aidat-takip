@@ -6,6 +6,7 @@ on:
       - 'public/**'
       - 'scripts/**'
       - 'tests/browser/mobile-theme.test.js'
+      - 'tests/browser/automatic-backup.test.js'
       - 'package.json'
       - '.github/workflows/mobile-ui.yml'
   workflow_dispatch:
