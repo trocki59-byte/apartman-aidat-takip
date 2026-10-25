@@ -9,7 +9,17 @@
 </head>
 <body>
   <a class="skip-link" href="#main">İçeriğe geç</a>
-  <div id="app"><div class="initial-loading"><span class="loader"></span><p>Apartman yönetimi açılıyor…</p></div></div>
+  <section id="opening-splash" class="opening-screen" aria-labelledby="opening-title">
+    <div class="opening-card">
+      <div class="opening-mark" aria-hidden="true">TS</div>
+      <h1 id="opening-title">TROÇKİ <span>STUDİO</span></h1>
+      <div class="opening-rule" aria-hidden="true"></div>
+      <p>Apartman Aidat Takip</p>
+      <div class="opening-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <button type="button" class="btn ghost opening-skip" data-action="skip-opening">Devam et</button>
+    </div>
+  </section>
+  <div id="app" inert><div class="initial-loading"><span class="loader"></span><p>Apartman yönetimi açılıyor…</p></div></div>
   <dialog id="modal" aria-labelledby="modal-title"></dialog>
   <div id="toast" role="status" aria-live="polite"></div>
   <noscript>Bu uygulamayı kullanmak için JavaScript'i etkinleştirin.</noscript>

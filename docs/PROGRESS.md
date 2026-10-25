@@ -30,3 +30,5 @@ Mobile/theme feature: max480 phone layout at all viewport sizes, persistent dark
 First real Chromium run verified layout, theme, persistence and data retention, then caught drawer focus during visibility transition. Focus now moves on next animation frame; browser assertion waits for focus transition. This is the RED reproduction for the focus fix.
 Focus root cause identified: visibility itself was transitioning from hidden, causing both immediate and first-frame focus to be ignored. Removed visibility transition (transform animation retained), so open state is immediately focusable.
 Real Chromium verification GREEN: GitHub Actions run 40213554734, commit 9e09a22b6a69d2077c384b988f433a5fa9fd2254. Layout, theme persistence, retained IndexedDB unit, all requested widths, short-screen drawer scrolling, focus and Escape passed. Publishing generated root assets from that tested source.
+
+User requested TROÇKİ STUDİO at opening. Added theme-aware 1.2-second brand splash with skip button; app inert only until splash dismisses. Browser test checks brand presence and skip; existing reload flow covers auto-dismiss. No data/storage changes.

@@ -18,6 +18,9 @@ test('telefon genişliği ve açık/koyu tercih sayfa yenilemede korunur',async 
     try {await route.fulfill({status:200,contentType:types[extname(file)]||'text/plain',body:readFileSync(file)});} catch {await route.fulfill({status:404,body:'Not found'});}
   });
   await page.goto('https://aidat.test/apartman-aidat-takip/');
+  await page.getByRole('heading',{name:'TROÇKİ STUDİO',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Devam et',exact:true}).click();
+  assert.equal(await page.locator('#opening-splash').count(),0);
   await page.getByRole('heading',{name:'Genel Bakış',exact:true}).waitFor();
   assert.ok(await page.evaluate(()=>document.body.getBoundingClientRect().width<=480));
   assert.ok(await page.getByRole('button',{name:'Menüyü aç'}).isVisible());

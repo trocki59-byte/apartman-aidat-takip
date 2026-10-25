@@ -223,6 +223,12 @@ async function importBackup(file) {
   } catch (error) { toast(error instanceof SyntaxError ? 'Yedek dosyası okunamadı. Geçerli bir JSON dosyası seçin.' : error.message, true); }
 }
 async function boot() { try { const session = await api('session'); state.passwordRequired = session.passwordRequired !== false; state.csrf = session.csrf || ''; if (!session.authenticated) { state.data = null; authView(session); return; } await load(); state.page = pageFromHash(); shell(); } catch (e) { $('#app').innerHTML = `<div class="initial-loading"><h2>${storageMode === 'browser' ? 'Tarayıcı kayıtları açılamadı' : 'Sunucuya bağlanılamadı'}</h2><p>${esc(e.message)}</p>${btn('Tekrar Dene', 'retry', 'refresh')}</div>`; } }
+function closeOpening() {
+  const opening = $('#opening-splash');
+  const restoreFocus = opening?.contains(document.activeElement);
+  opening?.remove(); $('#app').removeAttribute('inert');
+  if (restoreFocus) $('#main')?.focus();
+}
 function closeMenu() {
   $('.sidebar')?.classList.remove('open'); $('.nav-overlay')?.classList.remove('visible');
   const trigger = $('.mobile-menu'); if (trigger) { trigger.setAttribute('aria-expanded','false'); trigger.focus(); }
@@ -241,6 +247,7 @@ document.addEventListener('click', async e => {
   const a = button.dataset.action, id = button.dataset.id;
   try {
     switch (a) {
+      case 'skip-opening': closeOpening(); break;
       case 'theme': { toggleTheme(); const next = document.createElement('template'); next.innerHTML = themeButton(); const fresh = next.content.firstElementChild; button.innerHTML = fresh.innerHTML; for (const name of ['aria-label','aria-pressed','title']) button.setAttribute(name, fresh.getAttribute(name)); break; }
       case 'unit': openUnit(id); break; case 'batch': openBatch(); break; case 'extra': openExtra(); break;
       case 'payment': openPayment(id, button.dataset.charge); break; case 'expense': openExpense(); break;
@@ -275,4 +282,5 @@ document.addEventListener('input', e => { if (e.target.id === 'search') { const 
 window.addEventListener('hashchange', () => { if (!state.data) return; state.page = pageFromHash(); state.query = ''; state.status = 'all'; state.unitFilter = ''; shell(); });
 window.addEventListener('offline', () => toast(storageMode === 'browser' ? 'İnternet bağlantısı kesildi. Açık panelde kayıt yapmaya devam edebilirsiniz.' : 'Bağlantı kesildi. Kayıt yapmak için sunucu bağlantısı gerekiyor.', storageMode !== 'browser'));
 modal.addEventListener('click', e => { if (e.target === modal) { const r = modal.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) modal.close(); } });
+setTimeout(closeOpening, 1200);
 await boot();
